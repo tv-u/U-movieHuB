@@ -1,0 +1,6 @@
+{
+  "name": "U-MOVIE HUB",
+  "description": "Stream & explore trending movies, blockbuster cinema, TV series, multi-server playback, and global cinema across 10+ languages.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

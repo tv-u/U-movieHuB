@@ -1,0 +1,582 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>U-MOVIE HUB — Clean Pop-up Player (Sandbox-Free)</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    body {
+      background-color: #08090d;
+      color: #e2e8f0;
+      font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow-x: hidden;
+    }
+    /* Header Bar */
+    header {
+      background: #0f1118;
+      border-bottom: 1px solid #1e2230;
+      padding: 10px 18px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 12px;
+      z-index: 20;
+    }
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      text-decoration: none;
+    }
+    .brand-logo {
+      width: 28px;
+      height: 28px;
+      background: #E50914;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-weight: 900;
+      font-size: 14px;
+      box-shadow: 0 0 15px rgba(229, 9, 20, 0.4);
+    }
+    .brand-title {
+      font-family: 'Outfit', sans-serif;
+      font-size: 16px;
+      font-weight: 800;
+      color: #ffffff;
+      letter-spacing: -0.02em;
+    }
+    .brand-title span {
+      color: #E50914;
+    }
+    .movie-meta {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      min-width: 0;
+    }
+    .movie-title {
+      font-weight: 700;
+      font-size: 14px;
+      color: #ffffff;
+      max-width: 320px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .badge {
+      font-size: 10px;
+      font-weight: 700;
+      padding: 2px 6px;
+      border-radius: 4px;
+      background: #1e2230;
+      color: #94a3b8;
+      text-transform: uppercase;
+      font-family: monospace;
+    }
+    .badge-sandbox-free {
+      background: rgba(16, 185, 129, 0.15);
+      border: 1px solid rgba(16, 185, 129, 0.35);
+      color: #34d399;
+      font-size: 11px;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .badge-sandbox-free::before {
+      content: '';
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: #10b981;
+      display: inline-block;
+      animation: pulseDot 1.5s infinite;
+    }
+    @keyframes pulseDot {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.4; transform: scale(0.8); }
+    }
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 12px;
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      border: 1px solid #2a2e40;
+      background: #181a24;
+      color: #e2e8f0;
+      transition: all 0.15s ease;
+      text-decoration: none;
+    }
+    .btn:hover {
+      background: #252838;
+      color: #ffffff;
+      border-color: #3b4259;
+    }
+    .btn-red {
+      background: #E50914;
+      border-color: #E50914;
+      color: #ffffff;
+      box-shadow: 0 2px 10px rgba(229, 9, 20, 0.3);
+    }
+    .btn-red:hover {
+      background: #c70812;
+      border-color: #c70812;
+    }
+    /* Player Container */
+    .player-section {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      background: #000000;
+    }
+    .iframe-wrapper {
+      position: relative;
+      width: 100%;
+      flex: 1;
+      min-height: 58vh;
+      background: #000000;
+    }
+    iframe {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      border: none;
+      background: #000000;
+    }
+    /* Controls Bar Below Player */
+    .controls-bar {
+      background: #0d0f17;
+      border-top: 1px solid #1a1e2b;
+      padding: 12px 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .controls-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+    .servers-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: #ffffff;
+    }
+    .servers-header span.count {
+      color: #E50914;
+    }
+    .servers-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+      gap: 6px;
+    }
+    .server-pill {
+      background: #141722;
+      border: 1px solid #232738;
+      color: #cbd5e1;
+      padding: 8px 10px;
+      border-radius: 8px;
+      font-size: 11px;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      transition: all 0.15s ease;
+      text-align: left;
+    }
+    .server-pill:hover {
+      background: #1e2233;
+      border-color: #3b4259;
+      color: #ffffff;
+    }
+    .server-pill.active {
+      background: #E50914;
+      border-color: #E50914;
+      color: #ffffff;
+      box-shadow: 0 2px 10px rgba(229, 9, 20, 0.35);
+    }
+    .server-tag {
+      font-size: 9px;
+      padding: 1px 4px;
+      border-radius: 3px;
+      background: rgba(255, 255, 255, 0.15);
+      font-family: monospace;
+    }
+    .info-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 8px;
+      padding-top: 8px;
+      border-top: 1px solid #1a1e2b;
+      font-size: 11px;
+      color: #64748b;
+    }
+    .info-footer a {
+      color: #E50914;
+      text-decoration: none;
+    }
+    .info-footer a:hover {
+      text-decoration: underline;
+    }
+    /* Loading / Buffering Overlay */
+    #loadingIndicator {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      pointer-events: none;
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+      color: white;
+      font-size: 13px;
+      font-weight: 600;
+      z-index: 10;
+    }
+    .spinner {
+      width: 40px;
+      height: 40px;
+      border: 3px solid rgba(229, 9, 20, 0.2);
+      border-top-color: #E50914;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+  </style>
+</head>
+<body>
+  <!-- Header Bar -->
+  <header>
+    <div class="brand">
+      <div class="brand-logo">▶</div>
+      <div class="brand-title">U-MOVIE <span>HUB</span></div>
+      <div class="badge badge-sandbox-free">Sandbox-Free Pop Window</div>
+    </div>
+
+    <div class="movie-meta">
+      <div id="movieTitleDisplay" class="movie-title">Loading Movie...</div>
+      <span id="qualityDisplay" class="badge">4K ULTRA HD</span>
+      <span id="yearDisplay" class="badge">2024</span>
+    </div>
+
+    <div class="header-actions">
+      <button class="btn" id="btnBackToHub" title="Back to main website or focus parent window">
+        ← Back to Hub
+      </button>
+      <button class="btn btn-red" id="btnNextServer" title="Switch to next streaming server">
+        Next Server ➔
+      </button>
+      <button class="btn" id="btnReload" title="Reload current stream">
+        ↻ Reload
+      </button>
+      <button class="btn" id="btnFullscreen" title="Toggle Fullscreen">
+        ⛶ Fullscreen
+      </button>
+      <button class="btn" id="btnDirectTab" title="Open stream in raw browser tab">
+        ↗ Direct Link
+      </button>
+    </div>
+  </header>
+
+  <!-- Player Frame -->
+  <main class="player-section">
+    <div class="iframe-wrapper">
+      <div id="loadingIndicator">
+        <div class="spinner"></div>
+        <span>Connecting to streaming server...</span>
+      </div>
+      <!-- Unrestricted iframe with NO sandbox attribute -->
+      <iframe
+        id="movieFrame"
+        src="about:blank"
+        allowfullscreen="true"
+        webkitallowfullscreen="true"
+        mozallowfullscreen="true"
+        allow="autoplay; fullscreen; encrypted-media; picture-in-picture; cross-origin-isolated; web-share; clipboard-write; camera; microphone"
+        referrerpolicy="no-referrer"
+      ></iframe>
+    </div>
+
+    <!-- Controls & 10 Server Switcher -->
+    <div class="controls-bar">
+      <div class="controls-top">
+        <div class="servers-header">
+          <span>⚡ Select Streaming Server</span>
+          <span class="count" id="activeServerLabel">(Server 1 Active)</span>
+        </div>
+        <div style="font-size: 11px; color: #94a3b8;">
+          No sandbox restrictions. If video takes time to buffer, try Server 2, 3, or 4 below.
+        </div>
+      </div>
+
+      <div class="servers-grid" id="serversList">
+        <!-- 10 Servers injected via JS -->
+      </div>
+
+      <div class="info-footer">
+        <div>
+          🛡️ <strong>Native Window Mode:</strong> Running with top-level browser origin. Zero iframe sandbox or CSP blocks.
+        </div>
+        <div>
+          Keyboard: <strong>F</strong> Fullscreen · <strong>N</strong> Next Server · <strong>R</strong> Reload
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    // 10 Fast Streaming Servers
+    const SERVERS = [
+      {
+        id: 'vidsrc',
+        name: 'Server 1 (VidSrc)',
+        tag: 'HQ 4K',
+        getUrl: (id, s, e, type) => type === 'tv' 
+          ? `https://vidsrc.sh/embed/tv/${id}/${s || 1}/${e || 1}`
+          : `https://vidsrc.sh/embed/movie/${id}`
+      },
+      {
+        id: 'vidsrc2',
+        name: 'Server 2 (VidSrc 2)',
+        tag: 'Fast',
+        getUrl: (id, s, e, type) => type === 'tv'
+          ? `https://vidsrc.me/embed/tv?tmdb=${id}&season=${s || 1}&episode=${e || 1}`
+          : `https://vidsrc.me/embed/movie?tmdb=${id}`
+      },
+      {
+        id: 'embedsu',
+        name: 'Server 3 (EmbedSU)',
+        tag: 'Multi-Sub',
+        getUrl: (id, s, e, type) => type === 'tv'
+          ? `https://embed.su/embed/tv/${id}/${s || 1}/${e || 1}`
+          : `https://embed.su/embed/movie/${id}`
+      },
+      {
+        id: 'autoembed',
+        name: 'Server 4 (AutoEmbed)',
+        tag: '1080p',
+        getUrl: (id, s, e, type) => type === 'tv'
+          ? `https://player.autoembed.cc/embed/tv/${id}/${s || 1}/${e || 1}`
+          : `https://player.autoembed.cc/embed/movie/${id}`
+      },
+      {
+        id: 'vidlink',
+        name: 'Server 5 (VidLink)',
+        tag: 'Stable',
+        getUrl: (id, s, e, type) => type === 'tv'
+          ? `https://vidlink.pro/tv/${id}/${s || 1}/${e || 1}`
+          : `https://vidlink.pro/movie/${id}`
+      },
+      {
+        id: 'moviesapi',
+        name: 'Server 6 (MoviesAPI)',
+        tag: 'HD',
+        getUrl: (id, s, e, type) => type === 'tv'
+          ? `https://moviesapi.club/tv/${id}-${s || 1}-${e || 1}`
+          : `https://moviesapi.club/movie/${id}`
+      },
+      {
+        id: '2embed',
+        name: 'Server 7 (2Embed)',
+        tag: 'Global',
+        getUrl: (id, s, e, type) => type === 'tv'
+          ? `https://www.2embed.cc/embedtv/${id}&s=${s || 1}&e=${e || 1}`
+          : `https://www.2embed.cc/embed/${id}`
+      },
+      {
+        id: 'smashystream',
+        name: 'Server 8 (SmashyStream)',
+        tag: 'Fast',
+        getUrl: (id, s, e, type) => type === 'tv'
+          ? `https://embed.smashystream.com/playere.php?tmdb=${id}&season=${s || 1}&episode=${e || 1}`
+          : `https://embed.smashystream.com/playere.php?tmdb=${id}`
+      },
+      {
+        id: 'multiembed',
+        name: 'Server 9 (MultiEmbed)',
+        tag: 'Multi-Lang',
+        getUrl: (id, s, e, type) => type === 'tv'
+          ? `https://multiembed.mov/?video_id=${id}&tmdb=1&s=${s || 1}&e=${e || 1}`
+          : `https://multiembed.mov/?video_id=${id}&tmdb=1`
+      },
+      {
+        id: 'vidsrccc',
+        name: 'Server 10 (VidSrc CC)',
+        tag: 'Backup',
+        getUrl: (id, s, e, type) => type === 'tv'
+          ? `https://vidsrc.cc/v2/embed/tv/${id}/${s || 1}/${e || 1}`
+          : `https://vidsrc.cc/v2/embed/movie/${id}`
+      }
+    ];
+
+    // Parse URL params
+    const urlParams = new URLSearchParams(window.location.search);
+    const movieId = urlParams.get('id') || '1514026';
+    const movieTitle = urlParams.get('title') || 'Buddy (2024)';
+    const initialServerId = urlParams.get('server') || 'vidsrc';
+    const movieYear = urlParams.get('year') || '2024';
+    const movieQuality = urlParams.get('quality') || '4K ULTRA HD';
+    const movieType = urlParams.get('type') || 'movie';
+    const season = urlParams.get('s') || '1';
+    const episode = urlParams.get('e') || '1';
+
+    let currentServerIndex = SERVERS.findIndex(s => s.id === initialServerId);
+    if (currentServerIndex === -1) currentServerIndex = 0;
+
+    // Update metadata in DOM
+    document.title = `${movieTitle} — U-MOVIE HUB Pop Player`;
+    document.getElementById('movieTitleDisplay').textContent = movieTitle;
+    document.getElementById('qualityDisplay').textContent = movieQuality;
+    document.getElementById('yearDisplay').textContent = movieYear;
+
+    const frame = document.getElementById('movieFrame');
+    const loading = document.getElementById('loadingIndicator');
+    const activeLabel = document.getElementById('activeServerLabel');
+    const serversList = document.getElementById('serversList');
+
+    function renderServerPills() {
+      serversList.innerHTML = '';
+      SERVERS.forEach((server, index) => {
+        const btn = document.createElement('button');
+        btn.className = `server-pill ${index === currentServerIndex ? 'active' : ''}`;
+        btn.innerHTML = `
+          <span style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap; margin-right:4px;">${server.name}</span>
+          <span class="server-tag">${server.tag}</span>
+        `;
+        btn.onclick = () => switchServer(index);
+        serversList.appendChild(btn);
+      });
+    }
+
+    function switchServer(index) {
+      currentServerIndex = index;
+      const server = SERVERS[currentServerIndex];
+      activeLabel.textContent = `(${server.name} Active)`;
+
+      loading.style.display = 'flex';
+      const targetUrl = server.getUrl(movieId, season, episode, movieType);
+      frame.src = targetUrl;
+
+      // Update pill states
+      const pills = serversList.querySelectorAll('.server-pill');
+      pills.forEach((p, idx) => {
+        if (idx === currentServerIndex) p.classList.add('active');
+        else p.classList.remove('active');
+      });
+
+      setTimeout(() => {
+        loading.style.display = 'none';
+      }, 1200);
+    }
+
+    // Controls
+    const btnBack = document.getElementById('btnBackToHub');
+    if (btnBack) {
+      btnBack.onclick = () => {
+        if (window.opener && !window.opener.closed) {
+          window.opener.focus();
+        } else {
+          window.location.href = '/';
+        }
+      };
+    }
+
+    document.getElementById('btnNextServer').onclick = () => {
+      const nextIdx = (currentServerIndex + 1) % SERVERS.length;
+      switchServer(nextIdx);
+    };
+
+    document.getElementById('btnReload').onclick = () => {
+      const currentSrc = frame.src;
+      frame.src = 'about:blank';
+      loading.style.display = 'flex';
+      setTimeout(() => {
+        frame.src = currentSrc;
+        setTimeout(() => { loading.style.display = 'none'; }, 800);
+      }, 150);
+    };
+
+    document.getElementById('btnFullscreen').onclick = () => {
+      if (!document.fullscreenElement) {
+        document.documentElement.requestFullscreen().catch(() => {});
+      } else {
+        document.exitFullscreen().catch(() => {});
+      }
+    };
+
+    document.getElementById('btnDirectTab').onclick = () => {
+      const currentServer = SERVERS[currentServerIndex];
+      const targetUrl = currentServer.getUrl(movieId, season, episode, movieType);
+      window.open(targetUrl, '_blank', 'noopener,noreferrer');
+    };
+
+    // Listen for server switch events from parent window for zero-latency switching
+    window.addEventListener('message', (event) => {
+      if (event.data && event.data.type === 'SWITCH_SERVER') {
+        const sId = event.data.serverId;
+        const targetIdx = SERVERS.findIndex(s => s.id === sId);
+        if (targetIdx !== -1 && targetIdx !== currentServerIndex) {
+          switchServer(targetIdx);
+        }
+      }
+    });
+
+    // Keyboard shortcuts
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'n' || e.key === 'N') {
+        const nextIdx = (currentServerIndex + 1) % SERVERS.length;
+        switchServer(nextIdx);
+      } else if (e.key === 'r' || e.key === 'R') {
+        document.getElementById('btnReload').click();
+      } else if (e.key === 'f' || e.key === 'F') {
+        document.getElementById('btnFullscreen').click();
+      } else if (e.key === 'Escape') {
+        if (btnBack) btnBack.click();
+      }
+    });
+
+    // Initialize
+    renderServerPills();
+    switchServer(currentServerIndex);
+  </script>
+</body>
+</html>
